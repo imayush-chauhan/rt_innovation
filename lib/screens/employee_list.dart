@@ -7,16 +7,8 @@ import 'package:rt_innovation/screens/addEmployeeDetails.dart';
 import 'package:rt_innovation/utils/color.dart';
 import 'package:rt_innovation/utils/textStyle.dart';
 
-class EmployeeList extends StatefulWidget {
+class EmployeeList extends StatelessWidget {
   const EmployeeList({Key? key}) : super(key: key);
-
-  @override
-  State<EmployeeList> createState() => _EmployeeListState();
-}
-
-class _EmployeeListState extends State<EmployeeList> {
-
-  DateTime dateTime = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -95,12 +87,9 @@ class _EmployeeListState extends State<EmployeeList> {
           BlocProvider.of<AddRole>(context).clean();
           BlocProvider.of<AddToday>(context).clean();
           BlocProvider.of<NoToday>(context).clean();
-          await Navigator.push(context, MaterialPageRoute(builder: (context){
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
             return AddEmployeeDetails(edit: false,editName: "",inx: 0,);
-          })).then((value) {
-            setState(() {});
-          });
-
+          }));
         },
         backgroundColor: MyColor.main,
         elevation: 2,
@@ -129,11 +118,9 @@ class _EmployeeListState extends State<EmployeeList> {
           BlocProvider.of<AddRole>(context).setStr(state[index]["role"]);
           BlocProvider.of<AddToday>(context).setStr(DateTime.parse(state[index]["today"]));
           BlocProvider.of<NoToday>(context).setStr(DateTime.parse(state[index]["noday"]));
-          await Navigator.push(context, MaterialPageRoute(builder: (context){
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
             return AddEmployeeDetails(edit: true,editName: state[index]["name"],inx: data.indexOf(state[index]),);
-          })).then((value) {
-            setState(() {});
-          });
+          }));
         },
         title: Text(state[index]["name"],style: MyTextStyle.fontC1,),
         subtitle: Column(
@@ -149,5 +136,7 @@ class _EmployeeListState extends State<EmployeeList> {
       ),
     );
   }
+
 }
 
+DateTime dateTime = DateTime.now();

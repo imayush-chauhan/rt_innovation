@@ -5,6 +5,7 @@ import 'package:rt_innovation/bloc/cubit.dart';
 import 'package:rt_innovation/data/data.dart';
 import 'package:rt_innovation/screens/calender/calender.dart';
 import 'package:rt_innovation/screens/calender/calenderNoToday.dart';
+import 'package:rt_innovation/screens/employee_list.dart';
 import 'package:rt_innovation/utils/color.dart';
 import 'package:rt_innovation/utils/snackbar.dart';
 import 'package:rt_innovation/utils/textField.dart';
@@ -29,134 +30,148 @@ class AddEmployeeDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if(first){ name.text = editName; first = false;}
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      appBar: edit == false ?
-      AppBar(
-        backgroundColor: MyColor.main,
-        elevation: 0,
-        leading: const SizedBox(),
-        leadingWidth: 0,
-        title: Text("Add Employee Details", style: MyTextStyle.fontA),
-      ) : AppBar(
-        backgroundColor: MyColor.main,
-        elevation: 0,
-        leading: const SizedBox(),
-        leadingWidth: 0,
-        title: Text("Edit Employee Details", style: MyTextStyle.fontA),
-        actions:  [
-           Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: InkWell(
-              onTap: ()async{
-                await BlocProvider.of<EmployeeData>(context).deleteDataAt(inx);
-                await Future.delayed(const Duration(milliseconds: 50));
-                Navigator.of(context).pop();
-              },
-                child: const Icon(Icons.delete_outline,color: MyColor.white,)),
-          )
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: BlocBuilder<AddRole, String?>(
-          builder: (context,state){
-            return Column(
+    return WillPopScope(
+      onWillPop: () async{
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
+          return EmployeeList();
+        }));
+        return false;
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        appBar: edit == false ?
+        AppBar(
+          backgroundColor: MyColor.main,
+          elevation: 0,
+          leading: const SizedBox(),
+          leadingWidth: 0,
+          title: Text("Add Employee Details", style: MyTextStyle.fontA),
+        ) : AppBar(
+          backgroundColor: MyColor.main,
+          elevation: 0,
+          leading: const SizedBox(),
+          leadingWidth: 0,
+          title: Text("Edit Employee Details", style: MyTextStyle.fontA),
+          actions:  [
+             Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: InkWell(
+                onTap: ()async{
+                  await BlocProvider.of<EmployeeData>(context).deleteDataAt(inx);
+                  await Future.delayed(const Duration(milliseconds: 50));
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
+                    return EmployeeList();
+                  }));
+                },
+                  child: const Icon(Icons.delete_outline,color: MyColor.white,)),
+            )
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: BlocBuilder<AddRole, String?>(
+            builder: (context,state){
+              return Column(
+                children: [
+                  MyTextField.textField("Employee name", name, TextInputType.name, true),
+                  selectRole(context,state),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      timeStart(context),
+                      const Icon(Icons.arrow_forward,color: MyColor.main,size: 20,),
+                      timeEnd(context),
+                    ],
+                  )
+                ],
+              );
+            },
+          ),
+        ),
+        bottomNavigationBar: Padding(
+          padding: MediaQuery.of(context).viewInsets,
+          child: SizedBox(
+            height: 64,
+            child: Column(
               children: [
-                MyTextField.textField("Employee name", name, TextInputType.name, true),
-                selectRole(context,state),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    timeStart(context),
-                    const Icon(Icons.arrow_forward,color: MyColor.main,size: 20,),
-                    timeEnd(context),
-                  ],
+                const Divider(height: 2,color: MyColor.border,),
+                SizedBox(
+                  height: 60,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        MaterialButton(
+                          onPressed: (){
+                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
+                              return EmployeeList();
+                            }));
+                          },
+                          color: MyColor.mainLight,
+                          height: 40,
+                          minWidth: 73,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6)
+                          ),
+                          child: Text("Cancel",
+                            style: MyTextStyle.fontL1,),
+                        ),
+                        const SizedBox(width: 30,),
+                        MaterialButton(
+                          onPressed: ()async{
+                            if(name.text.isEmpty){
+                              snackBar(context, "Enter Employee Name");
+                              return;
+                            }
+                            if(context.read<AddRole>().state == null){
+                              snackBar(context, "Select Employee Role");
+                              return;
+                            }
+                            if(context.read<AddToday>().state == null || context.read<NoToday>().state == null){
+                              snackBar(context, "Select Joining and Leaving Date");
+                              return;
+                            }
+                            DateTime today = context.read<AddToday>().state!;
+                            DateTime noToday = context.read<NoToday>().state!;
+
+                            Map<dynamic,dynamic> data = {
+                              "name": name.text,
+                              "role": context.read<AddRole>().state,
+                              "today": today.toString(),
+                              "noday": noToday.toString(),
+                              "time": "${today.day} ${Data.month[today.month] ?? "-" } ${today.year}",
+                              "timeLeaving": "${noToday.day} ${Data.month[noToday.month] ?? "-" } ${noToday.year}",
+                              "check": int.parse("${noToday.year}${noToday.month.toString().padLeft(2,"0")}${noToday.day.toString().padLeft(2,"0")}",)
+                            };
+                            if(edit){
+                              await BlocProvider.of<EmployeeData>(context).editData(data,inx);
+                            }else{
+                              await BlocProvider.of<EmployeeData>(context).addData(data);
+                            }
+                            await Future.delayed(const Duration(milliseconds: 50));
+                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
+                              return EmployeeList();
+                            }));
+                          },
+                          color: MyColor.main,
+                          height: 40,
+                          minWidth: 73,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6)
+                          ),
+                          child: Text("Save",
+                          style: MyTextStyle.fontL,),
+                        ),
+
+                      ],
+                    ),
+                  ),
                 )
               ],
-            );
-          },
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: MediaQuery.of(context).viewInsets,
-        child: SizedBox(
-          height: 64,
-          child: Column(
-            children: [
-              const Divider(height: 2,color: MyColor.border,),
-              SizedBox(
-                height: 60,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      MaterialButton(
-                        onPressed: (){
-                          Navigator.of(context).pop();
-                        },
-                        color: MyColor.mainLight,
-                        height: 40,
-                        minWidth: 73,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6)
-                        ),
-                        child: Text("Cancel",
-                          style: MyTextStyle.fontL1,),
-                      ),
-                      const SizedBox(width: 30,),
-                      MaterialButton(
-                        onPressed: ()async{
-                          if(name.text.isEmpty){
-                            snackBar(context, "Enter Employee Name");
-                            return;
-                          }
-                          if(context.read<AddRole>().state == null){
-                            snackBar(context, "Select Employee Role");
-                            return;
-                          }
-                          if(context.read<AddToday>().state == null || context.read<NoToday>().state == null){
-                            snackBar(context, "Select Joining and Leaving Date");
-                            return;
-                          }
-                          DateTime today = context.read<AddToday>().state!;
-                          DateTime noToday = context.read<NoToday>().state!;
-
-                          Map<dynamic,dynamic> data = {
-                            "name": name.text,
-                            "role": context.read<AddRole>().state,
-                            "today": today.toString(),
-                            "noday": noToday.toString(),
-                            "time": "${today.day} ${Data.month[today.month] ?? "-" } ${today.year}",
-                            "timeLeaving": "${noToday.day} ${Data.month[noToday.month] ?? "-" } ${noToday.year}",
-                            "check": int.parse("${noToday.year}${noToday.month.toString().padLeft(2,"0")}${noToday.day.toString().padLeft(2,"0")}",)
-                          };
-                          if(edit){
-                            await BlocProvider.of<EmployeeData>(context).editData(data,inx);
-                          }else{
-                            await BlocProvider.of<EmployeeData>(context).addData(data);
-                          }
-                          await Future.delayed(const Duration(milliseconds: 50));
-                          Navigator.of(context).pop();
-                        },
-                        color: MyColor.main,
-                        height: 40,
-                        minWidth: 73,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6)
-                        ),
-                        child: Text("Save",
-                        style: MyTextStyle.fontL,),
-                      ),
-
-                    ],
-                  ),
-                ),
-              )
-            ],
+            ),
           ),
         ),
       ),
