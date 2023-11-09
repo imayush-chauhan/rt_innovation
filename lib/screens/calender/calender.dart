@@ -37,7 +37,11 @@ class MyCalenderToday extends StatelessWidget {
                             spacing: 10,
                             children: [
                               MaterialButton(
-                                onPressed: (){},
+                                onPressed: () async{
+                                  BlocProvider.of<AddToday>(context).setStr(DateTime.now());
+                                  await Future.delayed(const Duration(milliseconds: 50));
+                                  Navigator.of(context).pop();
+                                },
                                 color: MyColor.mainLight,
                                 height: 35,
                                 minWidth: 140,
@@ -49,8 +53,16 @@ class MyCalenderToday extends StatelessWidget {
                                   style: MyTextStyle.fontF2,),
                               ),
                               MaterialButton(
-                                onPressed: (){},
-                                color: MyColor.main,
+                                onPressed: ()async{
+                                  if(DateTime.now().weekday != 1){
+                                    BlocProvider.of<AddToday>(context).setStr(DateTime.now().add(Duration(days: 8 - DateTime.now().weekday)));
+                                  }else{
+                                    BlocProvider.of<AddToday>(context).setStr(DateTime.now());
+                                  }
+                                  await Future.delayed(const Duration(milliseconds: 50));
+                                  Navigator.of(context).pop();
+                                },
+                                color: MyColor.mainLight,
                                 height: 35,
                                 minWidth: 140,
                                 elevation: 0,
@@ -58,10 +70,18 @@ class MyCalenderToday extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(6)
                                 ),
                                 child: Text("Next Monday",
-                                  style: MyTextStyle.fontF3,),
+                                  style: MyTextStyle.fontF2,),
                               ),
                               MaterialButton(
-                                onPressed: (){},
+                                onPressed: ()async{
+                                  if(DateTime.now().weekday != 1){
+                                    BlocProvider.of<AddToday>(context).setStr(DateTime.now().add(Duration(days: 9 - DateTime.now().weekday)));
+                                  }else{
+                                    BlocProvider.of<AddToday>(context).setStr(DateTime.now());
+                                  }
+                                  await Future.delayed(const Duration(milliseconds: 50));
+                                  Navigator.of(context).pop();
+                                },
                                 color: MyColor.mainLight,
                                 height: 35,
                                 minWidth: 140,
@@ -73,7 +93,11 @@ class MyCalenderToday extends StatelessWidget {
                                   style: MyTextStyle.fontF2,),
                               ),
                               MaterialButton(
-                                onPressed: (){},
+                                onPressed: ()async{
+                                  BlocProvider.of<AddToday>(context).setStr(DateTime.now().add(const Duration(days: 7)));
+                                  await Future.delayed(const Duration(milliseconds: 50));
+                                  Navigator.of(context).pop();
+                                },
                                 color: MyColor.mainLight,
                                 height: 35,
                                 minWidth: 140,

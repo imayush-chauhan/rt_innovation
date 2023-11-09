@@ -87,70 +87,73 @@ class AddEmployeeDetails extends StatelessWidget {
               const Divider(height: 2,color: MyColor.border,),
               SizedBox(
                 height: 60,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    MaterialButton(
-                      onPressed: (){
-                        Navigator.of(context).pop();
-                      },
-                      color: MyColor.mainLight,
-                      height: 40,
-                      minWidth: 73,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      MaterialButton(
+                        onPressed: (){
+                          Navigator.of(context).pop();
+                        },
+                        color: MyColor.mainLight,
+                        height: 40,
+                        minWidth: 73,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6)
+                        ),
+                        child: Text("Cancel",
+                          style: MyTextStyle.fontL1,),
+                      ),
+                      const SizedBox(width: 30,),
+                      MaterialButton(
+                        onPressed: ()async{
+                          if(name.text.isEmpty){
+                            snackBar(context, "Enter Employee Name");
+                            return;
+                          }
+                          if(context.read<AddRole>().state == null){
+                            snackBar(context, "Select Employee Role");
+                            return;
+                          }
+                          if(context.read<AddToday>().state == null || context.read<NoToday>().state == null){
+                            snackBar(context, "Select Joining and Leaving Date");
+                            return;
+                          }
+                          DateTime today = context.read<AddToday>().state!;
+                          DateTime noToday = context.read<NoToday>().state!;
+
+                          Map<dynamic,dynamic> data = {
+                            "name": name.text,
+                            "role": context.read<AddRole>().state,
+                            "today": today.toString(),
+                            "noday": noToday.toString(),
+                            "time": "${today.day} ${Data.month[today.month] ?? "-" } ${today.year}",
+                            "timeLeaving": "${noToday.day} ${Data.month[noToday.month] ?? "-" } ${noToday.year}",
+                            "check": int.parse("${noToday.year}${noToday.month.toString().padLeft(2,"0")}${noToday.day.toString().padLeft(2,"0")}",)
+                          };
+                          if(edit){
+                            await BlocProvider.of<EmployeeData>(context).editData(data,inx);
+                          }else{
+                            await BlocProvider.of<EmployeeData>(context).addData(data);
+                          }
+                          await Future.delayed(const Duration(milliseconds: 50));
+                          Navigator.of(context).pop();
+                        },
+                        color: MyColor.main,
+                        height: 40,
+                        minWidth: 73,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6)
+                        ),
+                        child: Text("Save",
+                        style: MyTextStyle.fontL,),
                       ),
-                      child: Text("Cancel",
-                        style: MyTextStyle.fontL1,),
-                    ),
-                    const SizedBox(width: 30,),
-                    MaterialButton(
-                      onPressed: ()async{
-                        if(name.text.isEmpty){
-                          snackBar(context, "Enter Employee Name");
-                          return;
-                        }
-                        if(context.read<AddRole>().state == null){
-                          snackBar(context, "Select Employee Role");
-                          return;
-                        }
-                        if(context.read<AddToday>().state == null || context.read<NoToday>().state == null){
-                          snackBar(context, "Select Joining and Leaving Date");
-                          return;
-                        }
-                        DateTime today = context.read<AddToday>().state!;
-                        DateTime noToday = context.read<NoToday>().state!;
 
-                        Map<dynamic,dynamic> data = {
-                          "name": name.text,
-                          "role": context.read<AddRole>().state,
-                          "today": today.toString(),
-                          "noday": noToday.toString(),
-                          "time": "${today.day} ${Data.month[today.month] ?? "-" } ${today.year}",
-                          "timeLeaving": "${noToday.day} ${Data.month[noToday.month] ?? "-" } ${noToday.year}",
-                          "check": int.parse("${noToday.year}${noToday.month.toString().padLeft(2,"0")}${noToday.day.toString().padLeft(2,"0")}",)
-                        };
-                        if(edit){
-                          await BlocProvider.of<EmployeeData>(context).editData(data,inx);
-                        }else{
-                          await BlocProvider.of<EmployeeData>(context).addData(data);
-                        }
-                        await Future.delayed(const Duration(milliseconds: 50));
-                        Navigator.of(context).pop();
-                      },
-                      color: MyColor.main,
-                      height: 40,
-                      minWidth: 73,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6)
-                      ),
-                      child: Text("Save",
-                      style: MyTextStyle.fontL,),
-                    ),
-
-                  ],
+                    ],
+                  ),
                 ),
               )
             ],

@@ -141,7 +141,9 @@ class _EmployeeListState extends State<EmployeeList> {
           children: [
             Text(state[index]["role"],style: MyTextStyle.fontC2,),
             const SizedBox(height: 2,),
-            Text(state[index]["time"],style: MyTextStyle.fontC3,),
+            state[index]["check"] >= int.parse("${dateTime.year}${dateTime.month.toString().padLeft(2,"0")}${dateTime.day.toString().padLeft(2,"0")}",) ?
+            Text("from ${state[index]["time"]}",style: MyTextStyle.fontC3,) :
+            Text("${state[index]["time"]} - ${state[index]["timeLeaving"]}",style: MyTextStyle.fontC3,)
           ],
         ),
       ),
